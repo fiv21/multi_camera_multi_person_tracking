@@ -44,6 +44,7 @@ def main(yolo):
     writeVideo_flag = True
 
     video_capture = cv2.VideoCapture('top_view1.avi')
+    video_capture_1 = cv2.VideoCapture('demo1.avi')
 
     # if writeVideo_flag:
     #     # Define the codec and create VideoWriter object
@@ -62,22 +63,24 @@ def main(yolo):
     # ax1 = fig.add_subplot(1, 1, 1)
     while True:
         ret, frame = video_capture.read()  # frame shape 640*480*3
-        if ret == True:
-            print(' VIDEO FOUND')
-        t1 = time.time()
+        ret1, frame1 = video_capture_1.read()  # frame shape 640*480*3
+        # if ret == True:
+        #     print(' VIDEO FOUND')
+       #  t1 = time.time()
 
        # image = Image.fromarray(frame)
         image = Image.fromarray(frame[..., ::-1])  # bgr to rgb
+        image1 = Image.fromarray(frame1[..., ::-1])  # bgr to rgb
         boxs = yolo.detect_image(image)
+        boxs1 = yolo.detect_image(image1)
         print("box_co-ordinate = ", (boxs))
-
-        # for i in boxs:
-        #     print(i[0][0])
-
+        print("box_co-ordinate = ", (boxs1))
         features = encoder(frame, boxs)
+        features1 = encoder(frame1, boxs1)
 
         # score to 1.0 here).
         detections = [Detection(bbox, 1.0, feature) for bbox, feature in zip(boxs, features)]
+        detections1 = [Detection(bbox1, 1.0, feature1) for bbox1, feature1 in zip(boxs1, features1)]
 
         # Run non-maxima suppression.
         boxes = np.array([d.tlwh for d in detections])
@@ -85,9 +88,22 @@ def main(yolo):
         indices = preprocessing.non_max_suppression(boxes, nms_max_overlap, scores)
         detections = [detections[i] for i in indices]
 
+        boxes1 = np.array([d.tlwh for d in detections1])
+        scores1 = np.array([d.confidence for d in detections1])
+        indices1 = preprocessing.non_max_suppression(boxes1, nms_max_overlap, scores1)
+        detections1 = [detections[i] for i in indices1]
+
         # Call the tracker
         tracker.predict()
         tracker.update(detections)
+        tracker.update(detections1)
+
+        for track in tracker.tracks:
+            if not track.is_confirmed() or track.time_since_update > 1:
+                continue
+            bbox = track.to_tlbr()
+            cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (255, 255, 255), 2)
+            cv2.putText(frame, str(track.track_id), (int(bbox[0]), int(bbox[1])), 0, 5e-3 * 200, (0, 255, 0), 2)
 
         for track in tracker.tracks:
             if not track.is_confirmed() or track.time_since_update > 1:
