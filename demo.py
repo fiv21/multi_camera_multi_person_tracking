@@ -43,16 +43,16 @@ def main(yolo):
 
     writeVideo_flag = True
 
-    video_capture = cv2.VideoCapture('top_view1.avi')
+    video_capture = cv2.VideoCapture('demo1.avi')
 
-    # if writeVideo_flag:
-    #     # Define the codec and create VideoWriter object
-    #     w = int(video_capture.get(3))
-    #     h = int(video_capture.get(4))
-    #     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    #     out = cv2.VideoWriter('output1.avi', fourcc, 15, (w, h))
-    #     list_file = open('detection.txt', 'w')
-    #     frame_index = -1
+    if writeVideo_flag:
+        # Define the codec and create VideoWriter object
+        w = int(video_capture.get(3))
+        h = int(video_capture.get(4))
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        out = cv2.VideoWriter('output1.avi', fourcc, 15, (w, h))
+        list_file = open('detection.txt', 'w')
+        frame_index = -1
 
     fps = 0.0
     fig = plt.figure()
@@ -62,8 +62,10 @@ def main(yolo):
     # ax1 = fig.add_subplot(1, 1, 1)
     while True:
         ret, frame = video_capture.read()  # frame shape 640*480*3
-        if ret == True:
-            print(' VIDEO FOUND')
+        if ret != True:
+            print('NO VIDEO FOUND')
+            break
+            
         t1 = time.time()
 
        # image = Image.fromarray(frame)
@@ -115,7 +117,7 @@ def main(yolo):
                 if count == 1:
                     points = plt.scatter(x_list, y_list)
                 elif count > 1:
-                    print('x:', x_list, 'y:', y_list)
+                    # print('x:', x_list, 'y:', y_list)
                     points.remove()
                     points = plt.scatter(x_list, y_list)
                     # plt.pause(0.9)
