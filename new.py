@@ -1,45 +1,48 @@
-import matplotlib
-matplotlib.use('TkAgg')
+import cv2      # import the OpenCV library                     
+import numpy as np  # import the numpy library
+import matplotlib.pyplot as plt                                         
+# provide points from image 1
 
-import numpy as np
-import cv2
-import matplotlib.pyplot as plt
-
-fig = plt.figure()
-cap = cv2.VideoCapture(0)
+im_src = cv2.imread('topview.png')
+cv2.imshow('img_src', im_src)
 
 
-x1 = np.linspace(0.0, 5.0)
-x2 = np.linspace(0.0, 2.0)
+pts_src = np.array([[900,524],[1550,313],[650,236],[0,447]])
+# pts_src = np.array([[353,155], [558,223], [260,368],[55,300]])
+# corresponding points from image 2 (i.e. (154, 174) matches (212, 80))
+pts_dst = np.array([[0, 0],[1000, 0],[1000, 1000],[0, 1000]])
 
-y1 = np.cos(2 * np.pi * x1) * np.exp(-x1)
-y2 = np.cos(2 * np.pi * x2)
+
+plt.scatter(x=pts_src[:, 0], y=pts_src[:, 1])
+plt.show()
+
+plt.scatter(x=pts_dst[:, 0], y=pts_dst[:, 1])
+plt.show()
+# calculate matrix H
+h, status = cv2.findHomography(pts_src, pts_dst)
+ 
+# provide a point you wish to map from image 1 to image 2
+a = np.array([[342,96],[636,27],[648,396],[455,594]], dtype='float32')
+a = np.array([a])
+ 
+# finally, get the mapping
+imOut = cv2.perspectiveTransform(a, h)
+imOut = np.array([imOut])
+print(imOut)
+x = []
+y = []
+for i in imOut:
+        for j in i[0]:
+            x.append(j[0])
+            y.append(j[1])
+
+plt.scatter(x,y)
+plt.show()
+
+# print(x)
+# print(y)
 
 
-line1, = plt.plot(x1, y1, 'ko-')        # so that we can update data later
 
-for i in range(1000):
-    # update data
-    line1.set_ydata(np.cos(2 * np.pi * (x1 + i * 3.14 / 2)) * np.exp(-x1))
 
-    # redraw the canvas
-    fig.canvas.draw()
-
-    # convert canvas to image
-    img = np.fromstring(fig.canvas.tostring_rgb(), dtype=np.uint8,
-                        sep='')
-    img = img.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-
-    # img is rgb, convert to opencv's default bgr
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-
-    # display image with opencv or any operation you like
-    cv2.imshow("plot", img)
-
-    # display camera feed
-    ret, frame = cap.read()
-    cv2.imshow("cam", frame)
-
-    k = cv2.waitKey(33) & 0xFF
-    if k == 27:
-        break
+# plt.show()

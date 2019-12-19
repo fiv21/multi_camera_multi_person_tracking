@@ -59,7 +59,19 @@ def main(yolo):
     count = 0
     x_list = []
     y_list = []
+    x= []
+    y=[]
+    a1=[]
+    c = []
+    im=[]
+    a1=[]
     # ax1 = fig.add_subplot(1, 1, 1)
+    pts_src = np.array([[900,524],[1550,313],[650,236],[0,447]])
+
+    pts_dst = np.array([[0, 0],[1000, 0],[1000, 1000],[0, 1000]])
+    h, status = cv2.findHomography(pts_src, pts_dst)
+    # print('h=',h)
+
     while True:
         ret, frame = video_capture.read()  # frame shape 640*480*3
         if ret != True:
@@ -102,7 +114,7 @@ def main(yolo):
 
             bbox = det.to_tlbr()
 
-            # print((type(bbox)))
+            # print(((bbox)))
             cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (255, 0, 0), 2)
             # print("The co-ordinates are:", int(bbox[0]), int(bbox[1]))
 
@@ -114,15 +126,43 @@ def main(yolo):
                 count += 1
                 x_list.append(x)
                 y_list.append(y)
-                if count == 1:
-                    points = plt.scatter(x_list, y_list)
-                elif count > 1:
-                    print('x:', x_list, 'y:', y_list)
-                    points.remove()
-                    points = plt.scatter(x_list, y_list)
-                    # plt.pause(0.9)
-            x_list.clear()
-            y_list.clear()
+                print('x_list=', x_list, 'y_list=', y_list)
+                z = zip(x_list,y_list)
+                # print('z:',z)
+                
+                for i in z:
+                    c.append(i)
+                # print('c=',c)
+                    a = np.array([c], dtype='float32')
+                    a = np.array([c])
+                    a1.append(a)
+
+                    # # finally, get the mapping
+                    imOut = cv2.perspectiveTransform(a1, h)
+                    imOut = np.array([imOut])
+                    # im.append(imOut)
+                    print("imOut=",imOut)
+
+                # for i in im:
+                #     for j in i[0]:
+                #         # count += 1
+
+                #         x.append(j[0])
+                #         y.append(j[1])
+
+
+                #     # if count == 1:
+                #         points = plt.scatter(x,y)
+                #     # elif count > 1:
+                        # points.remove()
+                        # points = plt.scatter(x,y)
+                            # plt.pause(0.9)
+                    x_list.clear()
+                    y_list.clear()
+                    x.clear()
+                    y.clear()
+                    im.clear()
+                    a1.clear()
 
         except:
             continue
