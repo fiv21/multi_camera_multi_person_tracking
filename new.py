@@ -32,9 +32,9 @@ print(imOut)
 x = []
 y = []
 for i in imOut:
-        for j in i[0]:
-            x.append(j[0])
-            y.append(j[1])
+    for j in i[0]:
+        x.append(j[0])
+        y.append(j[1])
 
 plt.scatter(x,y)
 plt.show()
